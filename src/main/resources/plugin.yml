@@ -1,0 +1,4 @@
+name: RestTest
+version: '${project.version}'
+main: nl.rolflab.resttest.RestTest
+api-version: '1.21'
