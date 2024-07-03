@@ -79,7 +79,7 @@ public final class RestTest extends JavaPlugin {
     public JsonObject getPluginInfo() {
         JsonObject info = new JsonObject();
         info.addProperty("plugin", "RestTest");
-        info.addProperty("version", "1.0.0");
+        info.addProperty("version", "0.1.0");
         return info;
     }
 
