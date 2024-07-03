@@ -92,7 +92,8 @@ public final class RestTest extends JavaPlugin {
         pathHandler.addPrefixPath("/api", exchange -> {
             String apiKeyHeader = extractApiKeyFromAuthorizationHeader(exchange);
             if (apiKeyHeader != null && apiKeyHeader.equals(apiKey)) {
-                handleInfoRequest(exchange);
+                exchange.setStatusCode(200);
+                exchange.getResponseSender().send("There is nothing here yet..");
             } else {
                 exchange.setStatusCode(401);
                 exchange.getResponseSender().send("Unauthorized: Invalid API key");
