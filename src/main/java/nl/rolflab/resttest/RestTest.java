@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
-import io.undertow.server.handlers.PathHandler;
 import io.undertow.util.Headers;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
