@@ -9,6 +9,7 @@ import io.undertow.server.handlers.PathHandler;
 import io.undertow.util.Headers;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import util.HttpUtils;
 
 public final class RestTest extends JavaPlugin {
 
@@ -25,7 +26,7 @@ public final class RestTest extends JavaPlugin {
         gson = new GsonBuilder().setPrettyPrinting().create();
 
         String serverIp = getServer().getIp();
-        if (serverIp == null || serverIp.isEmpty()) {
+        if (serverIp.isEmpty()) {
             serverIp = "0.0.0.0";
         }
 
@@ -58,39 +59,15 @@ public final class RestTest extends JavaPlugin {
         port = config.getInt("port", 8080);
     }
 
-    private String extractApiKeyFromAuthorizationHeader(io.undertow.server.HttpServerExchange exchange) {
-        String authorizationHeader = exchange.getRequestHeaders().getFirst(Headers.AUTHORIZATION);
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            return authorizationHeader.substring("Bearer ".length()).trim();
-        }
-        return null;
-    }
-
     private HttpHandler createHandlers() {
-        PathHandler pathHandler = new PathHandler();
+        ApiKeyAuthMechanism apiKeyAuthMechanism = new ApiKeyAuthMechanism(apiKey);
+        AuthenticatingPathHandler pathHandler = new AuthenticatingPathHandler(apiKeyAuthMechanism);
 
-        pathHandler.addExactPath("/api/info", exchange -> {
-            String apiKeyHeader = extractApiKeyFromAuthorizationHeader(exchange);
-            if (apiKeyHeader != null && apiKeyHeader.equals(apiKey)) {
-                handleInfoRequest(exchange);
-            } else {
-                exchange.setStatusCode(401);
-                exchange.getResponseSender().send("Unauthorized: Invalid API key");
-            }
-        });
-
-        pathHandler.addExactPath("/api/status", exchange -> {
-            String apiKeyHeader = extractApiKeyFromAuthorizationHeader(exchange);
-            if (apiKeyHeader != null && apiKeyHeader.equals(apiKey)) {
-                handleStatusRequest(exchange);
-            } else {
-                exchange.setStatusCode(401);
-                exchange.getResponseSender().send("Unauthorized: Invalid API key");
-            }
-        });
+        pathHandler.addExactPath("/api/info", this::handleInfoRequest);
+        pathHandler.addExactPath("/api/status", this::handleStatusRequest);
 
         pathHandler.addPrefixPath("/api", exchange -> {
-            String apiKeyHeader = extractApiKeyFromAuthorizationHeader(exchange);
+            String apiKeyHeader = HttpUtils.extractApiKeyFromAuthorizationHeader(exchange);
             if (apiKeyHeader != null && apiKeyHeader.equals(apiKey)) {
                 exchange.setStatusCode(200);
                 exchange.getResponseSender().send("There is nothing here yet..");
